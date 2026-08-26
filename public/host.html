@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiglash — Big Screen</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>" />
+</head>
+<body class="host">
+  <div class="petals" id="petals" aria-hidden="true"></div>
+
+  <main class="screen">
+    <header class="screen-head">
+      <div class="brand">
+        <div class="title script" id="brandTitle">Quiglash</div>
+        <div class="sub" id="brandSub"></div>
+      </div>
+      <div class="round-pill hidden" id="roundPill"></div>
+    </header>
+
+    <section class="stage" id="stage"></section>
+
+    <footer class="controls" id="controls"></footer>
+    <div class="hint" id="hint"></div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/host.js"></script>
+</body>
+</html>

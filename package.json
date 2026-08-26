@@ -1,0 +1,25 @@
+{
+  "name": "quiglash",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Megan's Bachelorette Party Game \u2014 a Quiplash-style party game for the big screen",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test/flow-test.js",
+    "restore": "node scripts/restore.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

@@ -1,0 +1,15 @@
+# Render blueprint — https://render.com/docs/blueprint-spec
+# The free plan is a single always-single-instance web service, which is what this
+# game needs: rooms live in memory, so every phone must reach the same process.
+services:
+  - type: web
+    name: quiglash
+    runtime: node
+    plan: free
+    region: ohio            # closest of Render's free regions to North Carolina
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

@@ -1,0 +1,14 @@
+{
+  "brideName": "Megan",
+  "location": "North Carolina",
+  "gameTitle": "Quiglash",
+  "tagline": "Megan's Last Fling in the Carolina Hills",
+  "hashtag": "#MeganGetsHitched",
+  "judgeAnswersToo": false,
+  "pointsForBest": 1000,
+  "pointsForRunnerUp": 500,
+  "enableRunnerUp": true,
+  "answerTimeLimitSeconds": 0,
+  "maxAnswerLength": 180,
+  "questionsPerGame": 0
+}
