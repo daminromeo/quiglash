@@ -256,12 +256,40 @@ body.host::after {
 }
 .question-media img,
 .question-media video {
-  max-height: 42vh;
+  max-height: 30vh;
   max-width: min(80vw, 900px);
   border-radius: 18px;
   border: 4px solid var(--gold-soft);
   box-shadow: var(--shadow);
   background: #000;
+}
+
+/* Once the clip has been watched, it shrinks to a reminder so the answers —
+   the thing the judge actually has to read — own the screen. */
+.question-media.compact img,
+.question-media.compact video {
+  max-height: 14vh;
+  border-width: 3px;
+  border-radius: 12px;
+}
+.question-media.compact + .media-controls { margin-top: .8vh; }
+.question-media.compact + .media-controls .btn { padding: .45em 1em; font-size: .72rem; }
+
+.media-controls {
+  display: flex;
+  justify-content: center;
+  gap: .7rem;
+  margin-top: 1.2vh;
+}
+
+/* when the browser refused to autoplay audio, make the fix obvious from the couch */
+.btn.nudge {
+  border-color: var(--gold);
+  color: var(--gold-soft);
+  animation: nudge 1.6s ease-in-out infinite;
+}
+@keyframes nudge {
+  50% { background: rgba(217, 178, 106, .22); transform: translateY(-2px); }
 }
 
 .waiting-note {

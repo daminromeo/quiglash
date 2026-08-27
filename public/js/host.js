@@ -73,6 +73,7 @@
     clear(controls);
     hint.textContent = '';
     if (tick) { clearInterval(tick); tick = null; }
+    if (!state.question || !state.question.media) releaseMedia();
 
     ({
       lobby: renderLobby,
@@ -253,16 +254,88 @@
   }
 
   /* ---------- shared pieces ---------- */
-  function questionBlock(small = false) {
+
+  /* The stage is rebuilt on every state update (each submitted answer, each
+     reveal).  A video must survive that, or it restarts from zero every time
+     somebody hits send — so the element is built once per question and moved,
+     never recreated. */
+  let mediaNode = null;
+  let mediaKey = '';
+  let soundBlocked = false;
+
+  function releaseMedia() {
+    if (mediaNode && mediaNode.pause) mediaNode.pause();
+    mediaNode = null;
+    mediaKey = '';
+    soundBlocked = false;
+  }
+
+  function mediaFor(q) {
+    const key = `${q.id}|${q.media.type}|${q.media.src}`;
+    if (key === mediaKey && mediaNode) return mediaNode;
+    if (mediaNode && mediaNode.pause) mediaNode.pause();
+    mediaKey = key;
+    soundBlocked = false;
+
+    if (q.media.type !== 'video') {
+      mediaNode = el('img', { src: q.media.src, alt: '' });
+      return mediaNode;
+    }
+
+    const v = el('video', { src: q.media.src, playsinline: '', preload: 'auto' });
+    v.muted = false;
+    v.volume = 1;
+    mediaNode = v;
+
+    // Play with sound. Browsers only allow that once someone has clicked on the
+    // page — which by this point they have ('Start the games' / 'Next question').
+    // If it's blocked anyway, fall back to a silent play and offer a tap.
+    const started = v.play();
+    if (started && started.catch) {
+      started.catch(() => {
+        v.muted = true;
+        soundBlocked = true;
+        v.play().catch(() => {});
+        render();
+      });
+    }
+    return v;
+  }
+
+  function mediaControls(v) {
+    const soundBtn = el('button', {
+      class: `btn ghost small ${soundBlocked ? 'nudge' : ''}`,
+      onclick: () => {
+        v.muted = !v.muted;
+        if (!v.muted) { soundBlocked = false; v.play().catch(() => {}); }
+        render();
+      },
+    }, el('span', { text: v.muted ? '🔇 Tap for sound' : '🔊 Sound on' }));
+
+    const replay = el('button', {
+      class: 'btn ghost small',
+      onclick: () => { v.currentTime = 0; v.play().catch(() => {}); },
+    }, el('span', { text: '↻ Replay' }));
+
+    return el('div', { class: 'media-controls' }, soundBtn, replay);
+  }
+
+  /* recap = the question has already been asked, so text and media both shrink
+     to leave the screen to the answers */
+  function questionBlock(recap = false) {
     const q = state.question;
     if (!q) return el('div');
-    const wrap = el('div', {}, el('div', { class: `question-text ${small ? 'small' : ''}`, text: q.text }));
-    if (q.media && q.media.src) {
-      const media = q.media.type === 'video'
-        ? el('video', { src: q.media.src, autoplay: '', loop: '', muted: '', playsinline: '' })
-        : el('img', { src: q.media.src, alt: '' });
-      if (q.media.type === 'video') media.muted = true;
-      wrap.append(el('div', { class: 'question-media', style: 'margin-top:2vh' }, media));
+    const hasMedia = !!(q.media && q.media.src);
+    // A photo or video needs room, so the headline gives some up.
+    const smallText = recap || hasMedia;
+    const wrap = el('div', {}, el('div', { class: `question-text ${smallText ? 'small' : ''}`, text: q.text }));
+    if (hasMedia) {
+      const node = mediaFor(q);
+      wrap.append(el('div', {
+        class: `question-media ${recap ? 'compact' : ''}`,
+        style: recap ? 'margin-top:1.2vh' : 'margin-top:1.6vh',
+      }, node));
+      if (q.media.type === 'video') wrap.append(mediaControls(node));
     }
     return wrap;
   }

@@ -53,6 +53,11 @@ Open **`/edit`** in a browser (or the *Edit questions* button in the lobby). You
 
 - write, reorder, and delete questions
 - attach a **photo or video** to any question — it shows on the big screen *and* on everyone's phone
+
+  Videos play **with sound** on the big screen, once through, with **Replay** and a sound toggle
+  underneath. If the browser blocks the audio (it only does that before anyone has clicked on the
+  page) the clip still plays and the button says *Tap for sound*. Once the question has been asked
+  the clip shrinks to a thumbnail so the answers get the screen.
 - change the party settings: bride's name, location, tagline, hashtag, point values, answer timer,
   how many questions per game, whether the judge also answers
 
