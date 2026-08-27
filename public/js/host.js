@@ -73,10 +73,12 @@
     clear(controls);
     hint.textContent = '';
     if (tick) { clearInterval(tick); tick = null; }
-    if (!state.question || !state.question.media) releaseMedia();
+    const active = activeMedia();
+    if (mediaKeyOf(active?.owner, active?.media) !== mediaKey) releaseMedia();
 
     ({
       lobby: renderLobby,
+      intro: renderIntro,
       question: renderQuestion,
       reveal: renderReveal,
       judging: renderJudging,
@@ -137,6 +139,30 @@
     hint.textContent = canStart
       ? `${state.players.length} player${state.players.length === 1 ? '' : 's'} in the room`
       : 'Crown a judge (tap her name) to begin';
+  }
+
+  /* ---------- intro ---------- */
+  function renderIntro() {
+    const intro = state.config.intro || {};
+    if (intro.heading) {
+      stage.append(el('div', { class: 'intro-heading script', text: intro.heading }));
+    }
+    if (intro.media && intro.media.src) {
+      const node = mediaFor('intro', intro.media);
+      stage.append(el('div', { class: 'question-media intro-media' }, node));
+      if (intro.media.type === 'video') stage.append(mediaControls(node));
+    }
+    if (intro.message) {
+      stage.append(el('div', { class: 'intro-message', text: intro.message }));
+    }
+
+    controls.append(
+      el('button', { class: 'btn', onclick: () => send('host:next') },
+        el('span', { text: 'Start question one' })),
+      el('button', { class: 'btn ghost', onclick: () => send('host:restart') },
+        el('span', { text: 'Back to lobby' }))
+    );
+    hint.textContent = `${state.players.length} player${state.players.length === 1 ? '' : 's'} ready`;
   }
 
   /* ---------- question ---------- */
@@ -263,6 +289,17 @@
   let mediaKey = '';
   let soundBlocked = false;
 
+  /** The media the screen should be showing right now, if any. */
+  function activeMedia() {
+    if (!state) return null;
+    if (state.phase === 'intro') {
+      const m = state.config.intro && state.config.intro.media;
+      return m && m.src ? { owner: 'intro', media: m } : null;
+    }
+    const q = state.question;
+    return q && q.media && q.media.src ? { owner: q.id, media: q.media } : null;
+  }
+
   function releaseMedia() {
     if (mediaNode && mediaNode.pause) mediaNode.pause();
     mediaNode = null;
@@ -270,19 +307,22 @@
     soundBlocked = false;
   }
 
-  function mediaFor(q) {
-    const key = `${q.id}|${q.media.type}|${q.media.src}`;
+  const mediaKeyOf = (owner, media) =>
+    media && media.src ? `${owner}|${media.type}|${media.src}` : '';
+
+  function mediaFor(owner, media) {
+    const key = mediaKeyOf(owner, media);
     if (key === mediaKey && mediaNode) return mediaNode;
     if (mediaNode && mediaNode.pause) mediaNode.pause();
     mediaKey = key;
     soundBlocked = false;
 
-    if (q.media.type !== 'video') {
-      mediaNode = el('img', { src: q.media.src, alt: '' });
+    if (media.type !== 'video') {
+      mediaNode = el('img', { src: media.src, alt: '' });
       return mediaNode;
     }
 
-    const v = el('video', { src: q.media.src, playsinline: '', preload: 'auto' });
+    const v = el('video', { src: media.src, playsinline: '', preload: 'auto' });
     v.muted = false;
     v.volume = 1;
     mediaNode = v;
@@ -330,7 +370,7 @@
     const smallText = recap || hasMedia;
     const wrap = el('div', {}, el('div', { class: `question-text ${smallText ? 'small' : ''}`, text: q.text }));
     if (hasMedia) {
-      const node = mediaFor(q);
+      const node = mediaFor(q.id, q.media);
       wrap.append(el('div', {
         class: `question-media ${recap ? 'compact' : ''}`,
         style: recap ? 'margin-top:1.2vh' : 'margin-top:1.6vh',
@@ -413,6 +453,7 @@
     if (!state) return;
     e.preventDefault();
     if (state.phase === 'lobby' && state.judgeName) send('host:start');
+    else if (state.phase === 'intro') send('host:next');
     else if (state.phase === 'question') send('host:forceReveal');
     else if (state.phase === 'reveal') send('host:revealNext');
     else if (state.phase === 'scored') send('host:next');

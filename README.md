@@ -38,14 +38,17 @@ Everyone's phones must be on the **same Wi‑Fi** as the laptop running the game
 2. **Everyone scans it** (or types the code at the players link), picks a name, and lands in the lobby.
 3. **Megan is crowned automatically** if she types her name as `Megan`. Otherwise tap any name on the
    big screen to give her the crown. The judge doesn't write answers — she picks winners.
-4. **Start the games.** The question appears on the screen; every other phone gets a text box.
-5. **Answers stay hidden** until every phone has submitted. (Impatient? *Don't wait — show answers*.)
-6. **Reveal them one at a time** so Megan can read each one aloud, or hit *Reveal all*.
-7. **Megan awards points** — tap an answer right on the big screen, or use her phone.
+4. **Start the games.** If you've set up an opening screen, that comes first — your welcome message
+   and video, held on screen until you press *Start question one*. Otherwise it goes straight in.
+5. **The question appears** on the screen; every other phone gets a text box.
+6. **Answers stay hidden** until every phone has submitted. (Impatient? *Don't wait — show answers*.)
+7. **Reveal them one at a time** so Megan can read each one aloud, or hit *Reveal all*.
+8. **Megan awards points** — tap an answer right on the big screen, or use her phone.
    Best answer +1000, runner-up +500 (both configurable, runner-up can be skipped or turned off).
-8. **Next question**, and so on. After the last one: podium, confetti-petals, and a winner.
+9. **Next question**, and so on. After the last one: podium, confetti-petals, and a winner.
 
-**Shortcut:** on the big screen, `Space` / `→` does the obvious next thing — start, reveal, next question.
+**Shortcut:** on the big screen, `Space` / `→` does the obvious next thing — start, dismiss the
+opening screen, reveal, next question.
 
 ## Writing your own questions
 
@@ -58,6 +61,8 @@ Open **`/edit`** in a browser (or the *Edit questions* button in the lobby). You
   underneath. If the browser blocks the audio (it only does that before anyone has clicked on the
   page) the clip still plays and the button says *Tap for sound*. Once the question has been asked
   the clip shrinks to a thumbnail so the answers get the screen.
+- write the **opening screen** — a heading, a welcome message, and an optional video — shown once
+  after everyone has joined and before question one. Untick the box to skip it entirely.
 - change the party settings: bride's name, location, tagline, hashtag, point values, answer timer,
   how many questions per game, whether the judge also answers
 
@@ -71,6 +76,8 @@ Two tokens fill themselves in anywhere in a question, so the same bank works for
 | `{location}` | North Carolina |
 
 > `If {bride} were stranded on a desert island…` → *If Megan were stranded on a desert island…*
+
+They work in the opening screen's heading and message too.
 
 Questions and settings live in [data/questions.json](data/questions.json) and
 [data/config.json](data/config.json) if you'd rather edit the files directly. Uploaded media lands in
@@ -90,6 +97,9 @@ Questions and settings live in [data/questions.json](data/questions.json) and
 | `maxAnswerLength` | 180 | Characters per answer |
 | `questionsPerGame` | 0 | 0 = use them all |
 | `shuffleQuestions` | false | Randomize the order each game |
+| `intro.enabled` | true | Show the opening screen before question one |
+| `intro.heading` / `intro.message` | — | The welcome copy (line breaks are kept) |
+| `intro.media` | null | Optional video or photo for the opening screen |
 
 ## Put it online (free, no laptop at the party)
 

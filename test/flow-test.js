@@ -50,6 +50,18 @@ const ok = (m) => console.log('✓ ' + m);
 
   host.emit('host:start');
   await wait(200);
+
+  // The opening screen sits between the lobby and question one when it's enabled.
+  if (hostState.phase === 'intro') {
+    const intro = hostState.config.intro || {};
+    ok(`opening screen shown — "${(intro.heading || intro.message || '(media only)').slice(0, 40)}"`);
+    if (/\{bride\}|\{location\}/.test(`${intro.heading} ${intro.message}`)) fail('intro tokens not filled in');
+    host.emit('host:next');
+    await wait(200);
+  } else {
+    ok('no opening screen configured — straight into question one');
+  }
+
   if (hostState.phase !== 'question') return fail(`expected question, got ${hostState.phase}`);
   ok(`round 1 live: "${hostState.question.text.slice(0, 48)}…"`);
 

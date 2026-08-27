@@ -108,6 +108,7 @@
     clear(view);
     ({
       lobby: pLobby,
+      intro: pIntro,
       question: pQuestion,
       reveal: pWatch,
       judging: pJudging,
@@ -133,6 +134,14 @@
       class: 'btn-secondary', style: 'margin-top:14px',
       onclick: () => { localStorage.removeItem(SAVE); location.href = '/'; },
     }, el('span', { text: 'Leave' })));
+  }
+
+  function pIntro() {
+    const intro = state.config.intro || {};
+    view.append(el('div', { class: 'card' },
+      el('p', { class: 'you-scored script', text: intro.heading || 'Eyes on the screen' }),
+      el('p', { class: 'status', text: 'The first question is coming up…' })
+    ));
   }
 
   function pQuestion() {

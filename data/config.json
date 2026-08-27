@@ -10,5 +10,11 @@
   "enableRunnerUp": true,
   "answerTimeLimitSeconds": 0,
   "maxAnswerLength": 180,
-  "questionsPerGame": 0
+  "questionsPerGame": 0,
+  "intro": {
+    "enabled": true,
+    "heading": "Welcome to the weekend",
+    "message": "Phones out, ladies. One question at a time, funniest answer wins, and Megan is the only judge that counts. No appeals.",
+    "media": null
+  }
 }

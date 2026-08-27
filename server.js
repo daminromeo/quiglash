@@ -44,6 +44,7 @@ const loadConfig = () => ({
   maxAnswerLength: 180,
   questionsPerGame: 0,
   shuffleQuestions: false,
+  intro: { enabled: false, heading: '', message: '', media: null },
   ...readJson('config.json', {}),
 });
 
@@ -108,6 +109,15 @@ function shuffle(arr) {
   return out;
 }
 
+/** Is there an opening screen worth showing before question one? */
+const hasIntro = (room) => {
+  const intro = room.config.intro;
+  return !!(intro && intro.enabled &&
+    (String(intro.heading || '').trim() ||
+     String(intro.message || '').trim() ||
+     (intro.media && intro.media.src)));
+};
+
 const currentQuestion = (room) => {
   if (room.round < 0 || room.round >= room.order.length) return null;
   const q = room.bank[room.order[room.round]];
@@ -153,6 +163,16 @@ function viewFor(room, role, playerId) {
     }))
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 
+  const intro = room.config.intro || {};
+  const config = {
+    ...room.config,
+    intro: {
+      ...intro,
+      heading: fillTokens(intro.heading, room.config),
+      message: fillTokens(intro.message, room.config),
+    },
+  };
+
   const me = playerId ? room.players.get(playerId) : null;
   const myAnswer = me
     ? [...room.answers.values()].find((a) => a.playerId === me.id)
@@ -163,7 +183,7 @@ function viewFor(room, role, playerId) {
     phase: room.phase,
     round: room.round,
     totalRounds: room.order.length,
-    config: room.config,
+    config,
     question: q,
     players,
     answers,
@@ -440,6 +460,15 @@ io.on('connection', (socket) => {
     const r = room();
     if (!r || !isHost()) return;
     if (r.players.size === 0) return;
+    if (hasIntro(r)) {
+      // Sit on the welcome screen until the host moves on; host:next starts round 0.
+      r.phase = 'intro';
+      r.round = -1;
+      r.answers = new Map();
+      r.submittedThisRound = new Set();
+      broadcast(r);
+      return;
+    }
     startRound(r, 0);
   });
 

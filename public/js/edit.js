@@ -55,6 +55,46 @@
     }
   }
 
+  function renderIntroEditor() {
+    const box = $('introBox');
+    clear(box);
+    config.intro = config.intro || { enabled: false, heading: '', message: '', media: null };
+    const intro = config.intro;
+
+    const on = el('input', { type: 'checkbox' });
+    on.checked = !!intro.enabled;
+    on.addEventListener('change', () => { intro.enabled = on.checked; renderIntroEditor(); });
+    box.append(el('label', { class: 'check', style: 'margin-bottom:16px' }, on,
+      el('span', { text: 'Show an opening screen before question one' })));
+
+    if (!intro.enabled) return;
+
+    const heading = el('input', { type: 'text', value: intro.heading || '', placeholder: 'Welcome to the weekend' });
+    heading.addEventListener('input', () => { intro.heading = heading.value; });
+    box.append(el('label', { class: 'field' }, el('span', { text: 'Heading' }), heading));
+
+    const message = el('textarea', { placeholder: 'Say hello, explain the rules, set the tone…' });
+    message.value = intro.message || '';
+    message.addEventListener('input', () => { intro.message = message.value; });
+    box.append(el('label', { class: 'field' }, el('span', { text: 'Message' }), message));
+
+    box.append(el('div', { class: 'q-tools' },
+      el('button', { class: 'tool', onclick: () => { uploadTarget = intro; fileInput.click(); } },
+        el('span', { text: intro.media ? 'Replace video' : '+ Video / photo' })),
+      intro.media ? el('button', { class: 'tool danger', onclick: () => { intro.media = null; renderIntroEditor(); } },
+        el('span', { text: 'Remove' })) : null
+    ));
+
+    if (intro.media && intro.media.src) {
+      const preview = intro.media.type === 'video'
+        ? el('video', { src: intro.media.src, controls: '', playsinline: '' })
+        : el('img', { src: intro.media.src, alt: '' });
+      box.append(el('div', { class: 'thumb' }, preview, el('code', { text: intro.media.src })));
+    }
+  }
+
+  const renderAll = () => { renderConfig(); renderIntroEditor(); renderQuestions(); };
+
   function renderQuestions() {
     clear(list);
     $('count').textContent = String(questions.length);
@@ -120,7 +160,7 @@
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       uploadTarget.media = { type: data.type, src: data.src };
-      renderQuestions();
+      renderAll();
       msg('Uploaded — remember to Save');
     } catch (err) {
       msg(err.message || 'Upload failed', '#a33');
@@ -162,7 +202,7 @@
       if (!Array.isArray(incoming)) throw new Error('No questions found in that file');
       questions = incoming;
       if (!Array.isArray(parsed) && parsed.config) config = { ...config, ...parsed.config };
-      renderConfig(); renderQuestions();
+      renderAll();
       msg(`Loaded ${questions.length} questions — hit Save`);
     } catch (err) {
       msg(err.message || 'Could not read that file', '#a33');
@@ -181,7 +221,6 @@
     .then((data) => {
       questions = data.questions || [];
       config = data.config || {};
-      renderConfig();
-      renderQuestions();
+      renderAll();
     });
 })();
