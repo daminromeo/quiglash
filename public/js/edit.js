@@ -212,8 +212,9 @@
   // Only the hosted copy has the disappearing-edits problem; say so there.
   if (!/^(localhost|127\.0\.0\.1|\d+\.\d+\.\d+\.\d+)$/.test(location.hostname)) {
     $('hostedNote').innerHTML =
-      'This is the hosted copy — edits here last until the app restarts. ' +
-      'Use <b>Export</b> and commit the file to keep them for good.';
+      'This is the hosted copy — edits here (questions <i>and</i> uploaded media) last only until ' +
+      'the app restarts. To keep them, run <code>npm run pull -- ' + location.origin +
+      '</code> on your computer and commit the result.';
   }
 
   fetch('/api/questions')

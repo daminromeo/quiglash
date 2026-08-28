@@ -135,14 +135,46 @@ Render redeploys in a couple of minutes.
 - **It falls asleep** after 15 minutes with nobody connected, and takes ~50 seconds to wake up.
   Open the big screen **a few minutes before the party** and leave that tab open — as long as it's
   open, the game stays awake. If it does sleep mid-game, the room is lost and you start a new one.
-- **The hosted filesystem resets** on every restart. Questions and media edited *on the live site*
-  are temporary; anything committed to the repo is permanent. The `/edit` page on the hosted copy
-  says so, and has an **Export** button:
+- **The hosted filesystem resets** on every restart, so anything edited on the live site is
+  temporary. See below for how to make it stick.
 
-  ```bash
-  npm run restore -- ~/Downloads/quiglash-backup.json   # writes data/*.json
-  git add -A && git commit -m "questions from the live editor" && git push
-  ```
+### Making your questions and videos permanent
+
+**The rule: whatever is committed to this repo is what the app has after a restart.** The live site's
+own disk is scratch space — it survives until the app sleeps, redeploys, or restarts, and then it's
+back to whatever the repo says.
+
+So there are two safe ways to work, and one trap.
+
+**Best — edit here, then push.** Everything you save is already in the repo:
+
+```bash
+npm start                 # then open /edit, write questions, upload videos
+git add -A && git commit -m "questions and videos" && git push
+```
+
+Render redeploys in a couple of minutes and those files are now permanent.
+
+**If you already edited on the live site** — pull it all back in one command:
+
+```bash
+npm run pull -- https://your-app.onrender.com
+git add -A && git commit -m "questions and media from the live game" && git push
+```
+
+That downloads the questions, the party settings, the opening screen, **and every photo and video
+they point at**, straight into this folder. It tells you if a question points at a file the live site
+has already lost.
+
+**The trap:** the **Export** button in `/edit` saves the questions but *not* the video files, so on
+its own it can leave you with a question pointing at a video that no longer exists. Use `npm run
+pull` instead. (`npm run restore -- <file>` still works for an exported file if the site is asleep
+or already gone, but you'd need the media separately.)
+
+**Before the party, confirm it's really permanent:** open your live URL fresh, check that your
+questions and videos are there, then look at `git status` here — if it says *clean* and you've
+pushed, you're safe. A quick way to prove it: on Render, Manual Deploy → *Clear build cache & deploy*
+wipes the disk; whatever comes back is exactly what the repo holds.
 
 ### Other hosts
 
@@ -179,4 +211,5 @@ gives you a temporary public URL, and the QR code follows it automatically.
 | [public/css/style.css](public/css/style.css) | The whole bridal theme |
 | [test/flow-test.js](test/flow-test.js) | End-to-end smoke test |
 | [render.yaml](render.yaml) | Free-plan deploy config |
-| [scripts/restore.js](scripts/restore.js) | Pull an exported backup back into the repo |
+| [scripts/pull.js](scripts/pull.js) | Pull live questions + media into the repo (`npm run pull`) |
+| [scripts/restore.js](scripts/restore.js) | Load an exported backup file into the repo |
