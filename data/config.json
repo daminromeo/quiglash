@@ -2,19 +2,23 @@
   "brideName": "Megan",
   "location": "North Carolina",
   "gameTitle": "Quiglash",
-  "tagline": "Megan's Last Fling in the Carolina Hills",
-  "hashtag": "#MeganGetsHitched",
+  "tagline": "Gettin Quiggy wit it",
+  "hashtag": "",
   "judgeAnswersToo": false,
   "pointsForBest": 1000,
   "pointsForRunnerUp": 500,
   "enableRunnerUp": true,
-  "answerTimeLimitSeconds": 0,
+  "answerTimeLimitSeconds": 60,
   "maxAnswerLength": 180,
   "questionsPerGame": 0,
+  "shuffleQuestions": true,
   "intro": {
     "enabled": true,
     "heading": "Welcome to the weekend",
     "message": "Phones out, ladies. One question at a time, funniest answer wins, and Megan is the only judge that counts. No appeals.",
-    "media": null
+    "media": {
+      "type": "video",
+      "src": "/assets/1787918513385-Cameo_from_James_Lafferty.mp4"
+    }
   }
 }
