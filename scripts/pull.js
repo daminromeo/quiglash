@@ -17,6 +17,14 @@ if (!raw) {
   process.exit(1);
 }
 const base = raw.replace(/\/+$/, '');
+
+if (/your-app|your-app-name|example\.com|YOUR-APP/i.test(base)) {
+  console.error(`"${raw}" is the placeholder from the README, not your address.`);
+  console.error('Use your own Render URL — the one you open for the big screen, e.g.');
+  console.error('  npm run pull -- https://quiglash-abc1.onrender.com');
+  console.error('\nFind it at https://dashboard.render.com — open the service, the URL is under its name.');
+  process.exit(1);
+}
 const root = path.join(__dirname, '..');
 const dataDir = path.join(root, 'data');
 const assetDir = path.join(root, 'public', 'assets');
@@ -35,11 +43,17 @@ const mediaSources = (questions, config) => {
   let payload;
   try {
     const res = await fetch(`${base}/api/questions`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (res.status === 404) throw new Error("that address answered, but it isn't running Quiglash (404)");
+    if (!res.ok) throw new Error(`the site answered with HTTP ${res.status}`);
+    if (!String(res.headers.get('content-type') || '').includes('json')) {
+      throw new Error('that address returned a web page rather than game data');
+    }
     payload = await res.json();
   } catch (err) {
-    console.error(`Could not reach ${base} — ${err.message}`);
-    console.error('Is the URL right, and is the app awake? (A sleeping free instance takes ~50s.)');
+    console.error(`Could not pull from ${base} — ${err.message}.`);
+    console.error('\nCheck that:');
+    console.error(`  · the URL is right — open ${base}/edit in a browser and see your questions`);
+    console.error('  · the app is awake — a sleeping free instance takes ~50 seconds to answer');
     process.exit(1);
   }
 

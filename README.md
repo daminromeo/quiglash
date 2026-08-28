@@ -149,7 +149,12 @@ So there are two safe ways to work, and one trap.
 **Best — edit here, then push.** Everything you save is already in the repo:
 
 ```bash
-npm start                 # then open /edit, write questions, upload videos
+npm start
+```
+
+Open `/edit`, write your questions, upload your videos, hit Save. Then:
+
+```bash
 git add -A && git commit -m "questions and videos" && git push
 ```
 
@@ -157,10 +162,20 @@ Render redeploys in a couple of minutes and those files are now permanent.
 
 **If you already edited on the live site** — pull it all back in one command:
 
+Replace the URL below with your own Render address — the one you open for `/host`:
+
 ```bash
-npm run pull -- https://your-app.onrender.com
+npm run pull -- https://YOUR-APP-NAME.onrender.com
+```
+
+Check what it changed, then keep it:
+
+```bash
+git diff --stat
 git add -A && git commit -m "questions and media from the live game" && git push
 ```
+
+If the diff looks wrong, `git checkout -- .` throws the pull away and nothing is lost.
 
 That downloads the questions, the party settings, the opening screen, **and every photo and video
 they point at**, straight into this folder. It tells you if a question points at a file the live site
