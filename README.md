@@ -186,10 +186,15 @@ its own it can leave you with a question pointing at a video that no longer exis
 pull` instead. (`npm run restore -- <file>` still works for an exported file if the site is asleep
 or already gone, but you'd need the media separately.)
 
-**Before the party, confirm it's really permanent:** open your live URL fresh, check that your
-questions and videos are there, then look at `git status` here — if it says *clean* and you've
-pushed, you're safe. A quick way to prove it: on Render, Manual Deploy → *Clear build cache & deploy*
-wipes the disk; whatever comes back is exactly what the repo holds.
+**Before the party, prove it:**
+
+```bash
+npm run verify -- https://YOUR-APP-NAME.onrender.com
+```
+
+That checks the repo is clean and pushed, that the deployed build is the current code, that every
+question and the opening screen match this repo, and that the live site actually serves every video
+file at the right size. If it passes, a restart cannot lose anything.
 
 ### Other hosts
 
@@ -227,4 +232,5 @@ gives you a temporary public URL, and the QR code follows it automatically.
 | [test/flow-test.js](test/flow-test.js) | End-to-end smoke test |
 | [render.yaml](render.yaml) | Free-plan deploy config |
 | [scripts/pull.js](scripts/pull.js) | Pull live questions + media into the repo (`npm run pull`) |
+| [scripts/verify.js](scripts/verify.js) | Check the live site matches this repo (`npm run verify`) |
 | [scripts/restore.js](scripts/restore.js) | Load an exported backup file into the repo |

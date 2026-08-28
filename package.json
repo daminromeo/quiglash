@@ -10,7 +10,8 @@
     "dev": "node --watch server.js",
     "test": "node test/flow-test.js",
     "restore": "node scripts/restore.js",
-    "pull": "node scripts/pull.js"
+    "pull": "node scripts/pull.js",
+    "verify": "node scripts/verify.js"
   },
   "dependencies": {
     "express": "^4.21.2",
