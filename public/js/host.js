@@ -144,16 +144,32 @@
   /* ---------- intro ---------- */
   function renderIntro() {
     const intro = state.config.intro || {};
-    if (intro.heading) {
-      stage.append(el('div', { class: 'intro-heading script', text: intro.heading }));
-    }
-    if (intro.media && intro.media.src) {
+    const hasMedia = !!(intro.media && intro.media.src);
+
+    let mediaBlock = null;
+    if (hasMedia) {
       const node = mediaFor('intro', intro.media);
-      stage.append(el('div', { class: 'question-media intro-media' }, node));
-      if (intro.media.type === 'video') stage.append(mediaControls(node));
+      mediaBlock = el('div', { class: 'intro-media-block' },
+        el('div', {
+          class: `question-media intro-media ${mediaPortrait ? 'portrait' : ''}`,
+        }, node),
+        intro.media.type === 'video' ? mediaControls(node) : null
+      );
     }
-    if (intro.message) {
-      stage.append(el('div', { class: 'intro-message', text: intro.message }));
+
+    const heading = intro.heading
+      ? el('div', { class: 'intro-heading script', text: intro.heading }) : null;
+    const message = intro.message
+      ? el('div', { class: 'intro-message', text: intro.message }) : null;
+
+    if (hasMedia && mediaPortrait) {
+      // A tall clip next to the words uses the screen far better than stacking.
+      stage.append(el('div', { class: 'intro-split' },
+        mediaBlock,
+        el('div', { class: 'intro-side' }, heading, message)
+      ));
+    } else {
+      [heading, mediaBlock, message].filter(Boolean).forEach((n) => stage.append(n));
     }
 
     controls.append(
@@ -178,17 +194,20 @@
       )
     );
 
+    // Count and countdown share one line so a video question still shows both.
     const done = waiting.filter((p) => p.answered).length;
-    stage.append(el('div', {
-      class: 'waiting-note',
-      text: done === waiting.length && waiting.length
-        ? 'Everyone is in — revealing…'
-        : `${done} of ${waiting.length} answers submitted`,
-    }));
+    const row = el('div', { class: 'status-row' },
+      el('span', {
+        class: 'waiting-note',
+        text: done === waiting.length && waiting.length
+          ? 'Everyone is in — revealing…'
+          : `${done} of ${waiting.length} answers submitted`,
+      })
+    );
 
     if (state.deadline) {
-      const t = el('div', { class: 'timer' });
-      stage.append(t);
+      const t = el('span', { class: 'timer' });
+      row.append(t);
       const paint = () => {
         const left = Math.max(0, Math.round((state.deadline - Date.now()) / 1000));
         t.textContent = `${left}s`;
@@ -197,6 +216,9 @@
       paint();
       tick = setInterval(paint, 250);
     }
+    // Pinned to the footer, not the scrolling stage: on a long question with a
+    // video this is exactly the line that used to fall off the bottom.
+    controls.append(row);
 
     controls.append(
       el('button', { class: 'btn ghost', onclick: () => send('host:forceReveal') },
@@ -288,6 +310,7 @@
   let mediaNode = null;
   let mediaKey = '';
   let soundBlocked = false;
+  let mediaPortrait = false;
 
   /** The media the screen should be showing right now, if any. */
   function activeMedia() {
@@ -305,6 +328,7 @@
     mediaNode = null;
     mediaKey = '';
     soundBlocked = false;
+    mediaPortrait = false;
   }
 
   const mediaKeyOf = (owner, media) =>
@@ -316,13 +340,23 @@
     if (mediaNode && mediaNode.pause) mediaNode.pause();
     mediaKey = key;
     soundBlocked = false;
+    mediaPortrait = false;
+
+    // Phone-shot clips are taller than they are wide; the layout reacts once we know.
+    const noteShape = (w, h) => {
+      const portrait = h > w;
+      if (portrait !== mediaPortrait) { mediaPortrait = portrait; render(); }
+    };
 
     if (media.type !== 'video') {
-      mediaNode = el('img', { src: media.src, alt: '' });
+      const img = el('img', { src: media.src, alt: '' });
+      img.addEventListener('load', () => noteShape(img.naturalWidth, img.naturalHeight), { once: true });
+      mediaNode = img;
       return mediaNode;
     }
 
     const v = el('video', { src: media.src, playsinline: '', preload: 'auto' });
+    v.addEventListener('loadedmetadata', () => noteShape(v.videoWidth, v.videoHeight), { once: true });
     v.muted = false;
     v.volume = 1;
     mediaNode = v;
@@ -371,11 +405,17 @@
     const wrap = el('div', {}, el('div', { class: `question-text ${smallText ? 'small' : ''}`, text: q.text }));
     if (hasMedia) {
       const node = mediaFor(q.id, q.media);
-      wrap.append(el('div', {
-        class: `question-media ${recap ? 'compact' : ''}`,
-        style: recap ? 'margin-top:1.2vh' : 'margin-top:1.6vh',
-      }, node));
-      if (q.media.type === 'video') wrap.append(mediaControls(node));
+      const box = el('div', {
+        class: `question-media ${recap ? 'compact' : ''} ${mediaPortrait ? 'portrait' : ''}`,
+        style: recap ? 'margin-top:0' : 'margin-top:1.6vh',
+      }, node);
+      const buttons = q.media.type === 'video' ? mediaControls(node) : null;
+      if (recap) {
+        // Once we're reading answers, the clip and its buttons share one short row.
+        wrap.append(el('div', { class: 'recap-media-row' }, box, buttons));
+      } else {
+        wrap.append(box, buttons || document.createComment(''));
+      }
     }
     return wrap;
   }

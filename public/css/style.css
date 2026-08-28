@@ -237,10 +237,38 @@ body.host::after {
 
 /* --- opening screen -------------------------------------------------- */
 
-/* the opening screen carries heading + video + message at once, so its clip
+/* the opening screen carries heading + video + message at once, so a wide clip
    is capped tighter than a question's */
 .question-media.intro-media img,
 .question-media.intro-media video { max-height: 24vh; }
+
+/* A phone-shot (portrait) clip is nearly worthless at a landscape cap — it goes
+   beside the words instead, and gets real height. */
+.intro-split {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4vw;
+  align-items: center;
+  justify-content: center;
+  max-width: 92vw;
+  margin: 0 auto;
+}
+.intro-split .intro-side { text-align: left; }
+.intro-split .intro-heading { text-align: left; font-size: clamp(2.2rem, 4.4vw, 4.4rem); }
+.intro-split .intro-message {
+  text-align: left;
+  margin: 1.6vh 0 0;
+  max-width: 24ch;
+  font-size: clamp(1rem, 1.7vw, 1.8rem);
+}
+.question-media.intro-media.portrait img,
+.question-media.intro-media.portrait video { max-height: 55vh; }
+
+/* a portrait clip on a question screen needs more height than a wide one too */
+.question-media.portrait img,
+.question-media.portrait video { max-height: 38vh; }
+.question-media.compact.portrait img,
+.question-media.compact.portrait video { max-height: 13vh; }
 
 .intro-heading {
   text-align: center;
@@ -286,7 +314,7 @@ body.host::after {
 }
 .question-media img,
 .question-media video {
-  max-height: 30vh;
+  max-height: 28vh;
   max-width: min(80vw, 900px);
   border-radius: 18px;
   border: 4px solid var(--gold-soft);
@@ -298,11 +326,20 @@ body.host::after {
    the thing the judge actually has to read — own the screen. */
 .question-media.compact img,
 .question-media.compact video {
-  max-height: 14vh;
+  max-height: 10vh;
   border-width: 3px;
   border-radius: 12px;
 }
-.question-media.compact + .media-controls { margin-top: .8vh; }
+.question-media.compact + .media-controls { margin-top: 0; }
+
+/* thumbnail and its buttons on one line, to leave the answers room */
+.recap-media-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1vh;
+}
 .question-media.compact + .media-controls .btn { padding: .45em 1em; font-size: .72rem; }
 
 .media-controls {
@@ -330,6 +367,16 @@ body.host::after {
   color: rgba(253, 247, 244, .7);
 }
 
+.status-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+}
+/* sits on its own line above the host buttons */
+.controls .status-row { flex-basis: 100%; margin-bottom: .4vh; }
+
 .timer {
   text-align: center;
   font-family: var(--serif);
@@ -337,6 +384,7 @@ body.host::after {
   color: var(--gold);
   letter-spacing: .05em;
 }
+.status-row .timer { font-size: clamp(1.6rem, 3vw, 2.8rem); line-height: 1; }
 .timer.urgent { color: var(--rose); animation: pulse .9s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .45; } }
 
@@ -428,7 +476,7 @@ body.host::after {
 .judge-callout {
   text-align: center;
   font-family: var(--script);
-  font-size: clamp(1.8rem, 3.4vw, 3.2rem);
+  font-size: clamp(1.6rem, 2.9vw, 2.7rem);
   color: var(--gold-soft);
 }
 
